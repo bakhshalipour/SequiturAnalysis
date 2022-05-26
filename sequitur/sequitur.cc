@@ -220,7 +220,7 @@ int main(int argc, char **argv)
     S->last()->prev()->check();
 
     // if memory limit reached, "forget" part of the grammar
-    if (max_symbols && num_symbols > max_symbols)
+    if (max_symbols && num_symbols > max_symbols) {
       if (compress) {
          // if compression has not been initalized, initialize
          if (!compression_initialized) {
@@ -229,8 +229,10 @@ int main(int argc, char **argv)
          // send first symbol of (the remaining part of) the grammar
 	 // to the compressor
          forget(S->first());
+      } else if (phind) {
+          forget_print(S->first());
       }
-      else if (phind) forget_print(S->first());
+    }
   }
 
   // now all input has been read,

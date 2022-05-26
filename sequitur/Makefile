@@ -2,13 +2,10 @@
 
 CFLAGS = -O3
 
-all:	sequitur sequitur_simple
+all:	sequitur
 
 sequitur: sequitur.o classes.o compress.o arith.o bitio.o stats.o
 	g++ $(CFLAGS) -o sequitur sequitur.o classes.o compress.o arith.o bitio.o stats.o
-
-sequitur_simple: sequitur_simple.cc
-	g++ $(CFLAGS) -o sequitur_simple sequitur_simple.cc
 
 %.o: %.cc classes.h
 	g++ -DPLATFORM_UNIX $(CFLAGS) -c $*.cc

@@ -1,29 +1,30 @@
 #! /bin/bash
 
-SEQUITUR="sequitur/c++/sequitur"
-
-if ! [[ -f $SEQUITUR ]]; then
-    echo "sequitur executable was not found!"
+## Compile sequitur
+SEQUITUR_DIR="./sequitur"
+SEQUITUR_BIN="./sequitur/sequitur"
+cd "$SEQUITUR_DIR"
+make -j &>/dev/null
+if [[ ! -f sequitur ]]; then
+    echo "Sequitur executable was not found!"
     exit 0
 fi
+cd ..
 
-g++ -std=c++11 analyze_opportunity.cpp -O3 -o analyze_opportunity.o
-g++ -std=c++11 analyze_stream_length.cpp -O3 -o analyze_stream_length.o
+make -j &>/dev/null
+ANALYZE_BIN="measure_opp.out"
 
-for trace in $(ls Traces/)
-do
-    input_file="Traces/$trace"
-    trace_name=${trace%.*}
-    echo "Trace: $trace_name"
-    ./$SEQUITUR -m 5000 -p -d < $input_file > "$trace_name-grammar.txt"
-    echo "+++++++++++++++++++++++++++++++++++++++++++++++++++"
-    ./analyze_opportunity.o "$trace_name-grammar.txt" $(wc -l < $input_file)
-    echo "+++++++++++++++++++++++++++++++++++++++++++++++++++"
-    ./analyze_stream_length.o "$trace_name-grammar.txt"
-    echo "---------------------------------------------------"
-    echo "---------------------------------------------------"
+for TRACE in $(ls Traces/); do
+    INPUT_FILE="Traces/$TRACE"
+    TRACE_NAME="${TRACE%.*}"
+    GRAMMAR_FILE="$TRACE_NAME.gr"
+
+    echo "Trace: $TRACE_NAME"
+    ./"$SEQUITUR_BIN" -m 5000 -p -d < "$INPUT_FILE" > "$GRAMMAR_FILE" 2>/dev/null
+    ./"$ANALYZE_BIN" "$GRAMMAR_FILE" "$(wc -l < $INPUT_FILE)"
+
+    rm "$GRAMMAR_FILE"
+    echo "==================================="
 done
 
-rm *-grammar.txt*
-rm analyze_opportunity.o analyze_stream_length.o
-
+make clean &>/dev/null
