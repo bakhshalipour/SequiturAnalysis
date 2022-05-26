@@ -2,7 +2,7 @@ INC_DIRS := ../include
 SRC_DIRS := ./
 OBJ_DIR := ./obj
 BIN_DIR := .
-EXE_NAME := measure_opp.out
+EXE_NAME := analyze_seq.out
 
 INC := $(foreach d, $(INC_DIRS), -I$d)
 SRC := $(foreach d, $(SRC_DIRS), $(wildcard $d/*.cpp))
