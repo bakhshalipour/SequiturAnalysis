@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -6,10 +7,9 @@
 #include <list>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
-#define MAX_STREAM_LENGTH	(1 << 9)
-
-using namespace std;
+#define MAX_STREAM_LENGTH   (1 << 9)
 
 bool *head;
 std::string **grammar;
@@ -17,8 +17,7 @@ std::map<int, int> countDict;
 int *totalSymCount;
 bool *visitedSymbols;
 
-int calcTotalSymsCount(int line)
-{
+int calcTotalSymsCount(int line) {
     if (visitedSymbols[line]) {
         return totalSymCount[line];
     }
@@ -27,7 +26,7 @@ int calcTotalSymsCount(int line)
 
     int total = 0;
     for (int i = 0; i < countDict[line]; i++) {
-        string token = grammar[line][i];
+        std::string token = grammar[line][i];
 
         if (token[0] == '[') {
             total++;
@@ -43,12 +42,12 @@ int calcTotalSymsCount(int line)
 }
 
 int calcLen(std::string token) {
-    if (token[0] == '[') { // Symbol
+    if (token[0] == '[') {  // Symbol
         return 1;
     }
 
     int index = std::stoi(token);
-    if (head[index]) { // Visited
+    if (head[index]) {  // Visited
         return 1;
     }
 
@@ -64,13 +63,15 @@ int calcLen(std::string token) {
 
 int main(int argc, char const *argv[]) {
     if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " path/to/grammar input_length" << std::endl;
+        std::cerr << "Usage: " << argv[0];
+        std::cerr << " path/to/grammar input_length";
+        std::cerr << std::endl;
         return 1;
     }
 
     // Read the grammar file
-    ifstream grammarFile;
-    grammarFile.open(argv[1], ios::in);
+    std::ifstream grammarFile;
+    grammarFile.open(argv[1], std::ios::in);
     std::list<std::string> lines;
     std::string tempStr;
     while (std::getline(grammarFile, tempStr)) {
@@ -130,8 +131,13 @@ int main(int argc, char const *argv[]) {
     for (int i = 1; i < headLength; i++) {
         for (int j = 0; j < countDict[i]; j++) {
             std::string currentSym = grammar[i][j];
-            if (currentSym[0] != '[') continue; // None-terminal
-            if (visitedSyms.find(currentSym) != visitedSyms.end()) continue;    // Already counted
+
+            // Not terminal
+            if (currentSym[0] != '[') continue;
+
+            // Already counted
+            if (visitedSyms.find(currentSym) != visitedSyms.end()) continue;
+
             visitedSyms.insert(currentSym);
             newSyms++;
         }
@@ -139,13 +145,18 @@ int main(int argc, char const *argv[]) {
 
     int inputLength = atoi(argv[2]);
     std::cout << "Opportunity Analysis" << std::endl;
-    std::cout << "Opportunity: " << 1.0 * (inputLength - penalty) / inputLength << std::endl;
-    std::cout << "New: " << 1.0 * newSyms / inputLength << std::endl;
-    std::cout << "Non-Repetitive: " << 1.0 * nonRepetitiveSyms / inputLength << std::endl;
-    std::cout << "Head: " << 1.0 * (penalty - nonRepetitiveSyms - newSyms) / inputLength << std::endl; 
+    std::cout << "Opportunity: " \
+        << 1.0 * (inputLength - penalty) / inputLength << std::endl;
+    std::cout << "New: " \
+        << 1.0 * newSyms / inputLength << std::endl;
+    std::cout << "Non-Repetitive: " \
+        << 1.0 * nonRepetitiveSyms / inputLength << std::endl;
+    std::cout << "Head: " \
+        << 1.0 * (penalty - nonRepetitiveSyms - newSyms) / inputLength \
+        << std::endl;
 
     totalSymCount = new int[headLength]();
-    visitedSymbols = new bool [headLength]();
+    visitedSymbols = new bool[headLength]();
     for (int i = 1; i < headLength; i++) {
         totalSymCount[i] = calcTotalSymsCount(i);
     }
@@ -155,7 +166,7 @@ int main(int argc, char const *argv[]) {
     int streamsStats[MAX_STREAM_LENGTH + 1] = {0};
 
     for (int i = 0; i < countDict[0]; i++) {
-        string temp = grammar[0][i];
+        std::string temp = grammar[0][i];
         if (temp[0] == '[') continue;
 
         int rule_id = std::stoi(temp);
@@ -174,15 +185,17 @@ int main(int argc, char const *argv[]) {
         totalStreamsCount++;
     }
 
-    std::cout << "Average Stream Length = " << 1.0 * totalStreamsLength / totalStreamsCount << endl;
-    int cummulativeStreamsStats[MAX_STREAM_LENGTH + 1] = {0};
+    std::cout << "Average Stream Length = " \
+        << 1.0 * totalStreamsLength / totalStreamsCount << std::endl;
+    int cummStreamsStats[MAX_STREAM_LENGTH + 1] = {0};
+
     for (int i = 1; i <= MAX_STREAM_LENGTH; i++) {
-        cummulativeStreamsStats[i] = cummulativeStreamsStats[i - 1] + streamsStats[i];
+        cummStreamsStats[i] = cummStreamsStats[i - 1] + streamsStats[i];
     }
 
     for (int i = 2; i <= MAX_STREAM_LENGTH; i *= 2) {
-        std::cout << "Length<=" << i << ": " << 1.0 * cummulativeStreamsStats[i] / \
-            cummulativeStreamsStats[MAX_STREAM_LENGTH] << endl;
+        std::cout << "Length<=" << i << ": " << 1.0 * cummStreamsStats[i] / \
+            cummStreamsStats[MAX_STREAM_LENGTH] << std::endl;
     }
 
     return 0;
