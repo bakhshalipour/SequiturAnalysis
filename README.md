@@ -12,9 +12,9 @@ This repo, built on top of Sequitur, analyzes the Sequitur's grammar and calcula
 1. Compile the Sequitur project.
 
     ```
-    $ cd sequitur/c++
+    $ cd sequitur/
     $ make
-    $ cd ../..
+    $ cd ../
     ```
 
 2. Put your trace files into `Traces`. Two examples of trace files are provided in `Traces`.
